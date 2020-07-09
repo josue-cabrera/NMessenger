@@ -98,7 +98,7 @@ open class NMessengerViewController: UIViewController, UITextViewDelegate, NMess
      Adds observer for UIKeyboardWillChangeFrameNotification
      */
     fileprivate func addObservers() {
-        NotificationCenter.default.addObserver(self, selector: #selector(NMessengerViewController.keyboardNotification(_:)), name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
+			NotificationCenter.default.addObserver(self, selector: #selector(NMessengerViewController.keyboardNotification(_:)), name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
     }
     /**
      Removes observer for UIKeyboardWillChangeFrameNotification
@@ -121,7 +121,7 @@ open class NMessengerViewController: UIViewController, UITextViewDelegate, NMess
         setUpConstraintsForViews()
         //swipe down
         let swipeDown = UISwipeGestureRecognizer(target: self, action: #selector(NMessengerViewController.respondToSwipeGesture(_:)))
-        swipeDown.direction = UISwipeGestureRecognizerDirection.down
+			swipeDown.direction = UISwipeGestureRecognizer.Direction.down
         self.inputBarView.textInputAreaView.addGestureRecognizer(swipeDown)
     }
     
@@ -160,18 +160,21 @@ open class NMessengerViewController: UIViewController, UITextViewDelegate, NMess
      */
     fileprivate func setUpConstraintsForViews()
     {
-        inputBarView.translatesAutoresizingMaskIntoConstraints = false
-        self.inputBarBottomSpacing = NSLayoutConstraint(item: self.inputBarView, attribute: .bottom, relatedBy: .equal, toItem: self.bottomLayoutGuide, attribute: .top, multiplier: 1, constant: 0)
-        self.view.addConstraint(self.inputBarBottomSpacing)
-        self.view.addConstraint(NSLayoutConstraint(item: self.inputBarView, attribute: .leading, relatedBy: .equal, toItem: self.view, attribute: .leading, multiplier: 1, constant: 0))
-        self.view.addConstraint(NSLayoutConstraint(item: self.inputBarView, attribute: .trailing, relatedBy: .equal, toItem: self.view, attribute: .trailing, multiplier: 1, constant: 0))
-        self.view.addConstraint(NSLayoutConstraint(item: inputBarView, attribute: .height, relatedBy: .greaterThanOrEqual, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: self.inputBarView.frame.size.height))
-        self.view.addConstraint(NSLayoutConstraint(item: inputBarView, attribute: .height, relatedBy: .greaterThanOrEqual, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 43))
-        self.messengerView.translatesAutoresizingMaskIntoConstraints = false
-        self.view.addConstraint(NSLayoutConstraint(item: self.messengerView, attribute: .top, relatedBy: .equal, toItem: self.topLayoutGuide, attribute: .bottom, multiplier: 1, constant: 0))
-        self.view.addConstraint(NSLayoutConstraint(item: self.messengerView, attribute: .leading, relatedBy: .equal, toItem: self.view, attribute: .leading, multiplier: 1, constant: 0))
-        self.view.addConstraint(NSLayoutConstraint(item: self.messengerView, attribute: .trailing, relatedBy: .equal, toItem: self.view, attribute: .trailing, multiplier: 1, constant: 0))
-        self.view.addConstraint(NSLayoutConstraint(item: self.messengerView, attribute: .bottom, relatedBy: .equal, toItem: inputBarView, attribute: .top, multiplier: 1.0, constant: 0))
+			guard let inputBarView = inputBarView,
+				let messengerView = messengerView
+			else { return }
+			inputBarView.translatesAutoresizingMaskIntoConstraints = false
+        inputBarBottomSpacing = NSLayoutConstraint(item: inputBarView, attribute: .bottom, relatedBy: .equal, toItem: bottomLayoutGuide, attribute: .top, multiplier: 1, constant: 0)
+        view.addConstraint(inputBarBottomSpacing)
+        view.addConstraint(NSLayoutConstraint(item: inputBarView, attribute: .leading, relatedBy: .equal, toItem: view, attribute: .leading, multiplier: 1, constant: 0))
+        view.addConstraint(NSLayoutConstraint(item: inputBarView, attribute: .trailing, relatedBy: .equal, toItem: view, attribute: .trailing, multiplier: 1, constant: 0))
+        view.addConstraint(NSLayoutConstraint(item: inputBarView, attribute: .height, relatedBy: .greaterThanOrEqual, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: inputBarView.frame.size.height))
+        view.addConstraint(NSLayoutConstraint(item: inputBarView, attribute: .height, relatedBy: .greaterThanOrEqual, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 43))
+        messengerView.translatesAutoresizingMaskIntoConstraints = false
+        view.addConstraint(NSLayoutConstraint(item: messengerView, attribute: .top, relatedBy: .equal, toItem: topLayoutGuide, attribute: .bottom, multiplier: 1, constant: 0))
+        view.addConstraint(NSLayoutConstraint(item: messengerView, attribute: .leading, relatedBy: .equal, toItem: view, attribute: .leading, multiplier: 1, constant: 0))
+        view.addConstraint(NSLayoutConstraint(item: messengerView, attribute: .trailing, relatedBy: .equal, toItem: view, attribute: .trailing, multiplier: 1, constant: 0))
+        view.addConstraint(NSLayoutConstraint(item: messengerView, attribute: .bottom, relatedBy: .equal, toItem: inputBarView, attribute: .top, multiplier: 1.0, constant: 0))
     }
     
     open override var shouldAutorotate: Bool {
@@ -194,11 +197,11 @@ open class NMessengerViewController: UIViewController, UITextViewDelegate, NMess
      */
     @objc func keyboardNotification(_ notification: Notification) {
         if let userInfo = (notification as NSNotification).userInfo {
-            let endFrame = (userInfo[UIKeyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue
-            let duration:TimeInterval = (userInfo[UIKeyboardAnimationDurationUserInfoKey] as? NSNumber)?.doubleValue ?? 0
-            let animationCurveRawNSN = userInfo[UIKeyboardAnimationCurveUserInfoKey] as? NSNumber
-            let animationCurveRaw = animationCurveRawNSN?.uintValue ?? UIViewAnimationOptions().rawValue
-            let animationCurve:UIViewAnimationOptions = UIViewAnimationOptions(rawValue: animationCurveRaw)
+					let endFrame = (userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue
+					let duration:TimeInterval = (userInfo[UIResponder.keyboardAnimationDurationUserInfoKey] as? NSNumber)?.doubleValue ?? 0
+					let animationCurveRawNSN = userInfo[UIResponder.keyboardAnimationCurveUserInfoKey] as? NSNumber
+					let animationCurveRaw = animationCurveRawNSN?.uintValue ?? UIView.AnimationOptions().rawValue
+					let animationCurve:UIView.AnimationOptions = UIView.AnimationOptions(rawValue: animationCurveRaw)
             if endFrame?.origin.y >= UIScreen.main.bounds.size.height {
                 self.inputBarBottomSpacing.constant = 0
                 self.isKeyboardIsShown = false
