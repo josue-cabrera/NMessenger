@@ -1,1 +1,1 @@
-github "texturegroup/texture"
+github "texturegroup/texture" ~> 2.5
