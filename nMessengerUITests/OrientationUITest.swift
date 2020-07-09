@@ -36,15 +36,15 @@ class OrientationUITest: XCTestCase {
 
 			XCUIDevice.shared.orientation = .landscapeLeft
         
-        XCTAssert(UIInterfaceOrientationIsPortrait(UIApplication.shared.statusBarOrientation))
+			XCTAssert(UIApplication.shared.statusBarOrientation.isPortrait)
         
         XCUIDevice.shared.orientation = .landscapeRight
         
-        XCTAssert(UIInterfaceOrientationIsPortrait(UIApplication.shared.statusBarOrientation))
+			XCTAssert(UIApplication.shared.statusBarOrientation.isPortrait)
         
         XCUIDevice.shared.orientation = .portrait
         
-        XCTAssert(UIInterfaceOrientationIsPortrait(UIApplication.shared.statusBarOrientation))
+			XCTAssert(UIApplication.shared.statusBarOrientation.isPortrait)
         
     }
     
