@@ -52,7 +52,7 @@ open class MessageNode: GeneralMessengerCell {
     /**
      Spacing around the avatar. Defaults to UIEdgeInsetsMake(0, 0, 0, 10)
      */
-    open var avatarInsets: UIEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 10) {
+		open var avatarInsets: UIEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 10) {
         didSet {
             self.setNeedsLayout()
         }
@@ -267,7 +267,7 @@ open class MessageNode: GeneralMessengerCell {
      - parameter recognizer: Must be an UITapGestureRecognizer.
      Can be be overritten when subclassed
      */
-    open func messageNodeLongPressSelector(_ recognizer: UITapGestureRecognizer) {
+    @objc open func messageNodeLongPressSelector(_ recognizer: UITapGestureRecognizer) {
         contentNode?.messageNodeLongPressSelector(recognizer)
     }
 }
@@ -277,7 +277,7 @@ extension MessageNode {
     /**
      Notifies the delegate that the avatar was clicked
      */
-    public func avatarClicked()
+    @objc public func avatarClicked()
     {
         self.delegate?.avatarClicked?(self)
     }

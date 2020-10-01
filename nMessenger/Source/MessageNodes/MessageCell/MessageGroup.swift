@@ -41,7 +41,7 @@ open class MessageGroup: GeneralMessengerCell {
     /**
      Spacing around the avatar
      */
-    open var avatarInsets: UIEdgeInsets = UIEdgeInsetsMake(0, 0, 0, 10) {
+		open var avatarInsets: UIEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 10) {
         didSet {
             self.setNeedsLayout()
         }
@@ -199,6 +199,8 @@ open class MessageGroup: GeneralMessengerCell {
                 //Need to set height in cell node as of ASDK 2.x
                 self.frame.size.height = context.finalFrame(for: self.messageTable).size.height + self.cellPadding.bottom + self.cellPadding.top
                 
+                self.setNeedsLayout()
+                
                 //wait for layout animation
                 let dispatchTime: DispatchTime = DispatchTime.now() + Double(Int64(self.animationDelay)*1000 * Int64(NSEC_PER_MSEC)) / Double(NSEC_PER_SEC)
                 DispatchQueue.main.asyncAfter(deadline: dispatchTime) {
@@ -307,7 +309,7 @@ open class MessageGroup: GeneralMessengerCell {
      */
     open func replaceMessage(_ message: GeneralMessengerCell, withMessage newMessage: GeneralMessengerCell, completion: (()->Void)?) {
         if self.messages.contains(message) {
-            if let index = self.messages.index(of: message) {
+						if let index = self.messages.firstIndex(of: message) {
                 self.updateMessage(newMessage)
                 self.layoutCompletionBlock = completion
                 message.currentTableNode = nil
@@ -345,7 +347,7 @@ open class MessageGroup: GeneralMessengerCell {
     open func removeMessageFromGroup(_ message: GeneralMessengerCell, completion: (()->Void)?) {
         
         if self.messages.contains(message) {
-            if let index = self.messages.index(of: message) {
+						if let index = self.messages.firstIndex(of: message) {
                 let isLastMessage = self.messages.last == message
                 self.layoutCompletionBlock = completion
                 message.currentTableNode = nil
@@ -417,7 +419,7 @@ open class MessageGroup: GeneralMessengerCell {
     
     /** Calls and resets the layout completion block */
     fileprivate func callLayoutCompletionBlock() {
-        self.state = .none
+				self.state = MessageGroupState.none
         self.layoutCompletionBlock?()
         self.layoutCompletionBlock = nil
     }
@@ -429,7 +431,7 @@ extension MessageGroup {
     /**
      Notifies the delegate that the avatar was clicked
      */
-    public func avatarClicked() {
+    @objc public func avatarClicked() {
         self.delegate?.avatarClicked?(self)
     }
 }

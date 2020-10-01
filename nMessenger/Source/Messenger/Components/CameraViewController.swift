@@ -11,6 +11,7 @@
 import Foundation
 import Photos
 import AVFoundation
+import UIKit
 //MARK: CameraViewController
 /**
  CameraViewDelegate protocol for NMessenger.
@@ -47,7 +48,7 @@ open class CameraViewController: UIImagePickerController, UIImagePickerControlle
     //SelectionType type of selection the user is making  - defualt is camera
     open var selection = SelectionType.camera
     //AVAuthorizationStatus authorization status for the camera
-    open var cameraAuthStatus = AVCaptureDevice.authorizationStatus(forMediaType: AVMediaTypeVideo)
+    open var cameraAuthStatus = AVCaptureDevice.authorizationStatus(for: AVMediaType.video)
     //PHAuthorizationStatus authorization status for the library
     open var photoLibAuthStatus = PHPhotoLibrary.authorizationStatus()
     //MARK: Private Parameters
@@ -70,8 +71,8 @@ open class CameraViewController: UIImagePickerController, UIImagePickerControlle
     //CGFloat to define padding for bottom view
     fileprivate let bottomPadding:CGFloat = 40
     //Bool if user gave permission for the camera
-    fileprivate let isCameraAvailable = UIImagePickerController.isCameraDeviceAvailable(UIImagePickerControllerCameraDevice.rear) ||
-        UIImagePickerController.isCameraDeviceAvailable(UIImagePickerControllerCameraDevice.front)
+		fileprivate let isCameraAvailable = UIImagePickerController.isCameraDeviceAvailable(UIImagePickerController.CameraDevice.rear) ||
+			UIImagePickerController.isCameraDeviceAvailable(UIImagePickerController.CameraDevice.front)
     
     //MARK: View Lifecycle
     /**
@@ -90,8 +91,8 @@ open class CameraViewController: UIImagePickerController, UIImagePickerControlle
      */
     override open func viewDidAppear(_ animated: Bool) {
         
-        if (UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.camera)) {
-            if (self.sourceType == UIImagePickerControllerSourceType.camera) {
+				if (UIImagePickerController.isSourceTypeAvailable(UIImagePickerController.SourceType.camera)) {
+					if (self.sourceType == UIImagePickerController.SourceType.camera) {
                 orientCamera(flipCamera)
                 setFlash(flashButton)
             }
@@ -104,19 +105,19 @@ open class CameraViewController: UIImagePickerController, UIImagePickerControlle
      */
     fileprivate func initView() {
         //check if the camera is available
-        if ((UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.camera)) && (cameraAuthStatus == AVAuthorizationStatus.authorized)){
-            self.sourceType = UIImagePickerControllerSourceType.camera
+				if ((UIImagePickerController.isSourceTypeAvailable(UIImagePickerController.SourceType.camera)) && (cameraAuthStatus == AVAuthorizationStatus.authorized)){
+					self.sourceType = UIImagePickerController.SourceType.camera
             self.showsCameraControls = false
             self.selection = SelectionType.camera
             self.renderCameraElements()
             
         } else
             {
-                self.cameraAuthStatus = AVCaptureDevice.authorizationStatus(forMediaType: AVMediaTypeVideo)
+                self.cameraAuthStatus = AVCaptureDevice.authorizationStatus(for: AVMediaType.video)
                 if(photoLibAuthStatus != PHAuthorizationStatus.authorized) {
                     self.requestPhotoLibraryPermissions({ (granted) in
                         if(granted) {
-                            self.sourceType = UIImagePickerControllerSourceType.photoLibrary
+														self.sourceType = UIImagePickerController.SourceType.photoLibrary
                             self.selection = SelectionType.library
                         }
                         else
@@ -131,7 +132,7 @@ open class CameraViewController: UIImagePickerController, UIImagePickerControlle
                 }
                 else
                 {
-                    self.sourceType = UIImagePickerControllerSourceType.photoLibrary
+										self.sourceType = UIImagePickerController.SourceType.photoLibrary
                     self.selection = SelectionType.library
                 }
             }
@@ -176,11 +177,11 @@ open class CameraViewController: UIImagePickerController, UIImagePickerControlle
     fileprivate func addGalleryButton() {
         //GALLERY BUTTON
         gallery = UIButton(frame: CGRect(x: self.view.frame.width - sideButtonSize - bottomPadding, y: self.view.frame.height - sideButtonSize - bottomPadding, width: sideButtonSize, height: sideButtonSize))
-        gallery.addTarget(self, action: #selector(CameraViewController.changePictureMode), for: UIControlEvents.touchUpInside)
-        gallery.setImage(UIImage(named: "cameraRollIcon", in: Bundle(for: NMessengerViewController.self), compatibleWith: nil)?.withRenderingMode(UIImageRenderingMode.alwaysTemplate), for: UIControlState())
+				gallery.addTarget(self, action: #selector(CameraViewController.changePictureMode), for: UIControl.Event.touchUpInside)
+				gallery.setImage(UIImage(named: "cameraRollIcon", in: Bundle(for: NMessengerViewController.self), compatibleWith: nil)?.withRenderingMode(UIImage.RenderingMode.alwaysTemplate), for: UIControl.State())
         gallery.tintColor = UIColor.white
         galleryImage = UIImageView(frame: gallery.frame)
-        galleryImage.contentMode = UIViewContentMode.scaleAspectFill
+				galleryImage.contentMode = UIView.ContentMode.scaleAspectFill
         galleryImage.clipsToBounds = true
         galleryImage.isHidden = true
     }
@@ -191,7 +192,7 @@ open class CameraViewController: UIImagePickerController, UIImagePickerControlle
         let fetchOptions = PHFetchOptions()
         fetchOptions.sortDescriptors =  [NSSortDescriptor(key: "creationDate", ascending: true)]
         let fetchResult = PHAsset.fetchAssets(with: PHAssetMediaType.image, options: fetchOptions)
-        let lastAsset = fetchResult.lastObject as PHAsset!
+				let lastAsset = fetchResult.lastObject as PHAsset?
         let requestOptions = PHImageRequestOptions()
         requestOptions.version = PHImageRequestOptionsVersion.current
         PHImageManager.default().requestImage(for: lastAsset!, targetSize: self.galleryImage.frame.size, contentMode: PHImageContentMode.aspectFill, options: requestOptions) { (image, info) -> Void in
@@ -208,11 +209,11 @@ open class CameraViewController: UIImagePickerController, UIImagePickerControlle
         
         //CAPTURE BUTTON
         capturePictureButton = UIButton(frame: CGRect(x: self.view.frame.width/2 - bottomPadding, y: self.view.frame.height - captureButtonSize - bottomPadding, width: captureButtonSize, height: captureButtonSize))
-        capturePictureButton.setImage(UIImage(named: "shutterBtn", in: Bundle(for: NMessengerViewController.self), compatibleWith: nil)?.withRenderingMode(UIImageRenderingMode.alwaysTemplate), for: UIControlState())
+				capturePictureButton.setImage(UIImage(named: "shutterBtn", in: Bundle(for: NMessengerViewController.self), compatibleWith: nil)?.withRenderingMode(UIImage.RenderingMode.alwaysTemplate), for: UIControl.State())
         capturePictureButton.tintColor = UIColor.white
         
         //call the uiimagepickercontroller method takePicture()
-        capturePictureButton.addTarget(self, action: #selector(CameraViewController.capture(_:)), for: UIControlEvents.touchUpInside)
+				capturePictureButton.addTarget(self, action: #selector(CameraViewController.capture(_:)), for: UIControl.Event.touchUpInside)
         
     }
     /**
@@ -221,8 +222,8 @@ open class CameraViewController: UIImagePickerController, UIImagePickerControlle
     fileprivate func addFlipCameraButton() {
         //FLIP CAMERA BUTTON
         flipCamera = UIButton(frame: CGRect(x: bottomPadding, y: self.view.frame.height - sideButtonSize - bottomPadding, width: sideButtonSize, height: sideButtonSize))
-        flipCamera.addTarget(self, action: #selector(CameraViewController.flipCamera(_:)), for: UIControlEvents.touchUpInside)
-        flipCamera.setImage(UIImage(named: "flipCameraIcon", in: Bundle(for: NMessengerViewController.self), compatibleWith: nil)?.withRenderingMode(UIImageRenderingMode.alwaysTemplate), for: UIControlState())
+				flipCamera.addTarget(self, action: #selector(CameraViewController.flipCamera(_:)), for: UIControl.Event.touchUpInside)
+				flipCamera.setImage(UIImage(named: "flipCameraIcon", in: Bundle(for: NMessengerViewController.self), compatibleWith: nil)?.withRenderingMode(UIImage.RenderingMode.alwaysTemplate), for: UIControl.State())
         flipCamera.tintColor = UIColor.white
     }
     /**
@@ -234,10 +235,10 @@ open class CameraViewController: UIImagePickerController, UIImagePickerControlle
         cameraToolbar.barStyle = UIBarStyle.blackTranslucent
         cameraToolbar.isTranslucent = true
         let exitButton = UIButton(frame: CGRect(x: 20, y: 10, width: 40, height: 40))
-        exitButton.setImage(UIImage(named: "exitIcon", in: Bundle(for: NMessengerViewController.self), compatibleWith: nil)?.withRenderingMode(UIImageRenderingMode.alwaysTemplate), for: UIControlState())
+				exitButton.setImage(UIImage(named: "exitIcon", in: Bundle(for: NMessengerViewController.self), compatibleWith: nil)?.withRenderingMode(UIImage.RenderingMode.alwaysTemplate), for: UIControl.State())
         exitButton.tintColor = UIColor.white
         exitButton.imageEdgeInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
-        exitButton.addTarget(self, action: #selector(CameraViewController.exitButtonPressed), for: UIControlEvents.touchUpInside)
+				exitButton.addTarget(self, action: #selector(CameraViewController.exitButtonPressed), for: UIControl.Event.touchUpInside)
         cameraToolbar.addSubview(exitButton)
     }
     /**
@@ -246,10 +247,10 @@ open class CameraViewController: UIImagePickerController, UIImagePickerControlle
     open func addFlashButton() {
         //Flash Button
         flashButton = UIButton(frame: CGRect(x: self.view.frame.width - 60, y: 10, width: 40, height: 40))
-        flashButton.setImage(UIImage(named: "flashIcon", in: Bundle(for: NMessengerViewController.self), compatibleWith: nil)?.withRenderingMode(UIImageRenderingMode.alwaysTemplate), for: UIControlState())
+				flashButton.setImage(UIImage(named: "flashIcon", in: Bundle(for: NMessengerViewController.self), compatibleWith: nil)?.withRenderingMode(UIImage.RenderingMode.alwaysTemplate), for: UIControl.State())
         flashButton.imageEdgeInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
         flashButton.tintColor = UIColor.white
-        flashButton.addTarget(self, action: #selector(CameraViewController.toggleFlash(_:)), for: UIControlEvents.touchUpInside)
+			flashButton.addTarget(self, action: #selector(CameraViewController.toggleFlash(_:)), for: UIControl.Event.touchUpInside)
         cameraToolbar.addSubview(flashButton)
     }
     
@@ -257,26 +258,26 @@ open class CameraViewController: UIImagePickerController, UIImagePickerControlle
     /**
      Implementing didFinishPickingMediaWithInfo to send the selected image to the cameraDelegate
      */
-    open func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+    open func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         var myImage:UIImage? = nil
         
-        if let tmpImage = info[UIImagePickerControllerEditedImage] as? UIImage {
+			if let tmpImage = info[UIImagePickerController.InfoKey.editedImage] as? UIImage {
             myImage = tmpImage
         } else{
             print("Something went wrong")
         }
         
         if myImage == nil {
-            if let tmpImage = info[UIImagePickerControllerOriginalImage] as? UIImage {
+					if let tmpImage = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
                 myImage = tmpImage
             } else{
                 print("Something went wrong")
             }
             //myImage = info[UIImagePickerControllerOriginalImage] as? UIImage
             /* Correctly flip the mirrored image of front-facing camera */
-            if self.cameraDevice == UIImagePickerControllerCameraDevice.front {
+					if self.cameraDevice == UIImagePickerController.CameraDevice.front {
                 if let im = myImage, let cgImage = im.cgImage {
-                    myImage = UIImage(cgImage: cgImage, scale: im.scale, orientation: UIImageOrientation.leftMirrored)
+									myImage = UIImage(cgImage: cgImage, scale: im.scale, orientation: UIImage.Orientation.leftMirrored)
                 }
             }
         }
@@ -288,7 +289,7 @@ open class CameraViewController: UIImagePickerController, UIImagePickerControlle
     open func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         
         switch selection {
-        case .camera where !UIImagePickerController.isSourceTypeAvailable(UIImagePickerControllerSourceType.camera) :
+				case .camera where !UIImagePickerController.isSourceTypeAvailable(UIImagePickerController.SourceType.camera) :
             cameraDelegate?.cameraCancelSelection()
         case .library:
             changePictureMode()
@@ -301,17 +302,17 @@ open class CameraViewController: UIImagePickerController, UIImagePickerControlle
     /**
      Changes between camera view and gallery view
      */
-    open func changePictureMode() {
+    @objc open func changePictureMode() {
         
         switch selection {
         case .camera:
             selection = SelectionType.library
             removeCameraElements()
-            self.sourceType = UIImagePickerControllerSourceType.photoLibrary
+						self.sourceType = UIImagePickerController.SourceType.photoLibrary
         case .library where (isCameraAvailable &&  (cameraAuthStatus == AVAuthorizationStatus.authorized)):
             selection = SelectionType.camera
             addCameraElements()
-            self.sourceType = UIImagePickerControllerSourceType.camera
+						self.sourceType = UIImagePickerController.SourceType.camera
             orientCamera(flipCamera)
             setFlash(flashButton)
         default:
@@ -345,19 +346,19 @@ open class CameraViewController: UIImagePickerController, UIImagePickerControlle
     /**
      Closes the view
      */
-    open func exitButtonPressed() {
+    @objc open func exitButtonPressed() {
         cameraDelegate?.cameraCancelSelection()
     }
     /**
      Takes a photo
      */
-    open func capture(_ sender: UIButton) {
+    @objc open func capture(_ sender: UIButton) {
         self.takePicture()
     }
     /**
      Enables/disables flash
      */
-    open func toggleFlash(_ sender: UIButton) {
+    @objc open func toggleFlash(_ sender: UIButton) {
         if (sender.isSelected == false) {
             sender.tintColor = UIColor.n1ActionBlueColor()
             sender.isSelected = true
@@ -372,15 +373,15 @@ open class CameraViewController: UIImagePickerController, UIImagePickerControlle
      */
     fileprivate func setFlash(_ sender: UIButton) {
         if (sender.isSelected == true) {
-            self.cameraFlashMode = UIImagePickerControllerCameraFlashMode.on
+					self.cameraFlashMode = UIImagePickerController.CameraFlashMode.on
         } else {
-            self.cameraFlashMode = UIImagePickerControllerCameraFlashMode.off
+					self.cameraFlashMode = UIImagePickerController.CameraFlashMode.off
         }
     }
     /**
      Changes the camera from front to back
      */
-    open func flipCamera(_ sender: UIButton) {
+    @objc open func flipCamera(_ sender: UIButton) {
         if (sender.isSelected == false) {
             sender.tintColor = UIColor.n1ActionBlueColor()
             sender.isSelected = true
@@ -395,9 +396,9 @@ open class CameraViewController: UIImagePickerController, UIImagePickerControlle
      */
     fileprivate func orientCamera(_ sender:UIButton) {
         if (sender.isSelected == true) {
-            self.cameraDevice = UIImagePickerControllerCameraDevice.front
+					self.cameraDevice = UIImagePickerController.CameraDevice.front
         } else {
-            self.cameraDevice = UIImagePickerControllerCameraDevice.rear
+					self.cameraDevice = UIImagePickerController.CameraDevice.rear
         }
     }
     
@@ -416,7 +417,7 @@ open class CameraViewController: UIImagePickerController, UIImagePickerControlle
      - parameter completion: Must be (granted : Bool) -> Void
      */
     open func requestAccessForCamera(_ completion:@escaping (_ granted : Bool) -> Void) {
-        AVCaptureDevice.requestAccess(forMediaType: AVMediaTypeVideo) { (granted) in
+        AVCaptureDevice.requestAccess(for: AVMediaType.video) { (granted) in
             completion(granted)
         }
     }
@@ -431,7 +432,8 @@ open class CameraViewController: UIImagePickerController, UIImagePickerControlle
             switch status {
                 case .authorized: completion(true)
                 case .denied, .notDetermined, .restricted : completion(false)
-            }
+						@unknown default: completion(false)
+					}
         }
     }
 }
